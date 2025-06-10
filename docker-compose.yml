@@ -15,21 +15,21 @@
 # limitations under the License.
 #
 
-version: "3"
+# version: "3"
 
 services:
   apisix-dashboard:
-    image: apache/apisix-dashboard:2.10.1-alpine
+    image: apache/apisix-dashboard:3.0.1-alpine
     restart: always
     volumes:
     - ./dashboard_conf/conf.yaml:/usr/local/apisix-dashboard/conf/conf.yaml
     ports:
-    - "9000:9000"
+    - "9010:9010"
     networks:
       apisix:
 
   apisix:
-    image: apache/apisix:2.13.1-alpine
+    image: apache/apisix:2.14.1-alpine
     restart: always
     volumes:
       - ./apisix_log:/usr/local/apisix/logs
@@ -46,7 +46,7 @@ services:
       apisix:
 
   etcd:
-    image: bitnami/etcd:3.4.15
+    image: bitnami/etcd:3.6.1
     restart: always
     volumes:
       - etcd_data:/bitnami/etcd
@@ -61,7 +61,7 @@ services:
       apisix:
 
   web1:
-    image: nginx:1.19.0-alpine
+    image: nginx:1.28.0-alpine
     restart: always
     volumes:
       - ./upstream/web1.conf:/etc/nginx/nginx.conf
@@ -70,10 +70,10 @@ services:
     environment:
       - NGINX_PORT=80
     networks:
-      apisix:
+      - apisix
 
   web2:
-    image: nginx:1.19.0-alpine
+    image: nginx:1.28.0-alpine
     restart: always
     volumes:
       - ./upstream/web2.conf:/etc/nginx/nginx.conf
@@ -82,10 +82,10 @@ services:
     environment:
       - NGINX_PORT=80
     networks:
-      apisix:
+      - apisix
 
   prometheus:
-    image: prom/prometheus:v2.25.0
+    image: prom/prometheus:v3.4.1
     restart: always
     volumes:
       - ./prometheus_conf/prometheus.yml:/etc/prometheus/prometheus.yml
@@ -95,7 +95,7 @@ services:
       apisix:
 
   grafana:
-    image: grafana/grafana:7.3.7
+    image: grafana/grafana:12.0.1
     restart: always
     ports:
       - "3000:3000"
