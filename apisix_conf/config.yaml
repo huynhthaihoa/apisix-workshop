@@ -15,26 +15,57 @@
 # limitations under the License.
 #
 
+# APISIX supports setting the IP access allowlist of Admin API to prevent APISIX from being illegally accessed and attacked
+
 apisix:
   node_listen: 9080              # APISIX listening port
   enable_ipv6: false
-
-  allow_admin:                  # http://nginx.org/en/docs/http/ngx_http_access_module.html#allow
-    - 0.0.0.0/0              # We need to restrict ip access rules for security. 0.0.0.0/0 is for test.
-
-  admin_key:
-    - name: "admin"
-      key: edd1c9f034335f136f87ad84b625c8f1
-      role: admin                 # admin: manage all configuration data
-                                  # viewer: only can view configuration data
-    - name: "viewer"
-      key: 4054f7cf07e344346cd3f287985e76a2
-      role: viewer
   
+  admin:
+    allow_admin:                  # http://nginx.org/en/docs/http/ngx_http_access_module.html#allow
+      - 127.0.0.0/24              # We need to restrict ip access rules for security. 0.0.0.0/0 is for test.
+
+    admin_key:
+      - name: "admin"
+        key: edd1c9f034335f136f87ad84b625c8f1
+        role: admin                 # admin: manage all configuration data
+                                    # viewer: only can view configuration data
+      - name: "viewer"
+        key: 4054f7cf07e344346cd3f287985e76a2
+        role: viewer
+
+    admin_listen:
+      ip: 0.0.0.0
+      port: 9180
+
   enable_control: true
   control:
     ip: "0.0.0.0"
     port: 9092
+  
+  # A route is a routing path to upstream targets. 
+  # In Apache APISIX, routes are responsible for matching client's requests based on defined rules,
+  # loading and executing the corresponding plugins, as well as forwarding requests to the specified upstream services.
+  # A simple route can be set up with a path-matching URI and a corresponding upstream address.
+  routes:
+    # HTTP method matching the newly-defined route
+    methods: ["GET"]
+
+    # Host matching the newly-defined route
+    host: "example.com"
+
+    # URI matching the newly-defined route. 
+    # Notice the star character: every URI starting with /anything/ matches.
+    uri: "/anything/*"
+    
+    # An upstream is a set of target nodes with the same work. 
+    # It defines a virtual host abstraction that performs load balancing on a given set of service nodes according to the configured rules.
+    # Upstream references a cluster of nodes, which you can balance load across, depending on some algorithm
+    upstream:
+      nodes:
+         "httpbin.org:80": 1
+      type: roundrobin
+     
 
 etcd:
   host:                           # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
